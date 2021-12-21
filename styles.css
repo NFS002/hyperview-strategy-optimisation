@@ -1,0 +1,18 @@
+/*** CSS ***/
+
+@keyframes redblink { 
+   50% { border: 2px solid #ff0000; } 
+}
+
+.hyperview-red-blink {
+   animation-name: redblink;
+   animation-delay: 0.5s;
+   animation-duration: 1s;
+   animation-iteration-count: 5;
+   animation-timing-function: linear;
+}
+
+.text_notes .notes-desc-block textarea {
+   overflow-y: hidden;
+}
+

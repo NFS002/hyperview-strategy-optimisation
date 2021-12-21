@@ -1,0 +1,2 @@
+# Trading Strategy Parameter Optimisation
+### Running Various TradingView Pinescript trading strategies, each with different time periods and parameter values, then scraping some statistics on the results

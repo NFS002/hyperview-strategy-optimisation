@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+
+  "name": "Trading Strategy Parameter Optimisation",
+  "description": "Trading Strategy Parameter Optimisation",
+  "version": "0.1",
+  "icons": { "128": "imgs/trading-strategy-logo.png" },
+  "permissions": [
+    "tabs",
+    "<all_urls>"
+  ],
+  "browser_action": {
+        "default_popup": "popup.html",
+        "default_icon": "imgs/trading-strategy-logo.png"
+  },
+  "web_accessible_resources": [
+    "loookup.js",
+    "symbols.js"
+  ],
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "css": ["styles.css"],
+    "js": [
+      "content.js"
+    ]
+  }]
+}
