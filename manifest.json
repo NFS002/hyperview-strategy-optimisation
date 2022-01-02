@@ -14,8 +14,9 @@
         "default_icon": "imgs/trading-strategy-logo.png"
   },
   "web_accessible_resources": [
-    "loookup.js",
-    "symbols.js"
+    "lookup.js",
+    "symbols.js",
+    "params.js"
   ],
   "content_scripts": [{
     "matches": ["<all_urls>"],

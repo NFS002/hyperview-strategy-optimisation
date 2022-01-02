@@ -1,6 +1,7 @@
 /*** Logger ***/
 
 import Symbols from './symbols.js'
+import { params } from './params.js'
 
 class LoggerLevel {
 	static DEBUG = "DEBUG"
@@ -58,7 +59,7 @@ class Lookup {
 	hvs_otextarea_name
 
 
-	async find(root, selector, name) {
+	async find({root = document, selector, name }) {
 
 		this.log(`Looking for selector: ${selector} (name=${name})`)
 
@@ -102,7 +103,7 @@ class Lookup {
 		
 		else {
 
-			symbol = await this.find(document, selector, name)
+			symbol = await this.find({selector: selector, name: name})
 
 		}
 
@@ -144,10 +145,9 @@ class Lookup {
 	   	return result;
 	}
 
-	async clickif(selector, name, func) {
+	async clickif({ selector, name, func = () => true}) {
 
 		name ??= selector
-		func ??= () => true
 
 		this.log(`Click if: (selector=${selector} name=${name}, func='${func.toString()}')`)
 
@@ -166,12 +166,11 @@ class Lookup {
 	}
 
 
-	async clickeventif(selector, name, func) {
+	async clickeventif({ selector, name, func = () => true}) {
 
 		name ??= selector
-		func ??= () => true
 
-		this.log(`Click if: (selector=${selector} name=${name}, func='${func.toString()}')`)
+		this.log(`Click event if: (selector=${selector} name=${name}, func='${func.toString()}')`)
 
 		var symbol = await this.ifnotexists(selector, name)
 
@@ -198,9 +197,9 @@ class Lookup {
 
 		/* 1. Open text notes and create new note */
 
-		this.clickif('div[data-name="text_notes"]', 'text_notes', symbol => symbol.element.getAttribute("data-active").toLowerCase() !== 'true')
+		this.clickif({selector: 'div[data-name="text_notes"]', name: 'text_notes', func: symbol => symbol.element.getAttribute("data-active").toLowerCase() !== 'true'})
 
-		this.clickif('div.new-note-btn', 'new-note-btn')
+		this.clickif({selector: 'div.new-note-btn', name: 'new-note-btn' })
 
 		/* 2. Create new innter title and replace input element */
 
@@ -210,7 +209,7 @@ class Lookup {
 
 		this.log(`Creating new inner title element (text='${text}', name='${ititle_name}')`)
 
-		var ititle_input_symbol = await this.find(document, '.notes-desc-inner > .title-wrap > input')
+		var ititle_input_symbol = await this.find({ selector: '.notes-desc-inner > .title-wrap > input' })
 
 		var ititle_elm = document.createElement('div')
 
@@ -232,13 +231,13 @@ class Lookup {
 
 		this.hvs_otitle_name  = 'hvs_otitle_' + hvs_id
 
-		var otitle_symbol = await this.find(document, '#bottom-area div.note.active > div.note-header > div.title', this.hvs_otitle_name)
+		var otitle_symbol = await this.find({ selector: '#bottom-area div.note.active > div.note-header > div.title', name: this.hvs_otitle_name })
 
 		otitle_symbol.element.innerHTML = text
 
 		/* 5. Replace inner text area and cache for future use */
 
-		var textarea_to_replace = await this.find(document,'#bottom-area div.notes-desc-inner > textarea')
+		var textarea_to_replace = await this.find({ selector: '#bottom-area div.notes-desc-inner > textarea' })
 
 		var itextarea_elm = document.createElement('textarea')
 
@@ -259,14 +258,40 @@ class Lookup {
 
 		this.hvs_otextarea_name = 'hvs_otextarea_' + hvs_id
 
-		await this.find(document, '#bottom-area div.note.active > div.note-desc', this.hvs_otextarea_name)
+		await this.find({ selector: '#bottom-area div.note.active > div.note-desc', name: this.hvs_otextarea_name })
 
 	}
 
 	async params() {
-		var srctitle_symbol = await this.clickeventif("body > div.js-rootresizer__contents div[data-name='legend-source-item'] div[data-name='legend-source-title']", 'sources-title')
-		var srcsettigs_symbol = await this.find(srctitle_symbol.element.parentNode, "div[data-name='legend-settings-action'][title='Settings']", 'sources-settings')
+		var src_title = await this.clickeventif({ selector: "div.js-rootresizer__contents div[data-name='legend-source-item'] div[data-name='legend-source-title']",
+			name: 'sources-title'})
+
+		var srcroot = src_title.element.parentElement.parentElement
+		
+		await this.clickeventif({ root: srcroot, selector: "div[data-name='legend-settings-action'][title='Settings']",
+			name: 'sources-settings' })
+
+		var paramscontent = await this.find({ selector: "#overlap-manager-root div[data-name='indicator-properties-dialog'] div[class^='content']",
+			name: 'params-content'})
+
+		var paramscontent_children = paramscontent.element.children
+
+		for (var idx = 0; idx < params.inputs.length; idx++) {
+			var content_idx = ((idx + 1) * 2) - 1
+			var param_input_wrapper = paramscontent_children[content_idx]
+			var param_input = await this.find({root: param_input_wrapper, selector: 'input', name: `param_input_${idx}`})
+			var cevent = new MouseEvent('mousedown', {
+			  view: window,
+			  bubbles: true,
+			  cancelable: true
+			});
+			
+			param_input_wrapper.dispatchEvent(cevent);
+			param_input_wrapper.click()
+			//param_input.element.value = "0.9"
+			break
+		}
 	}
 }
 
-export { ConsoleLogger, Logger }
+export { Lookup }
